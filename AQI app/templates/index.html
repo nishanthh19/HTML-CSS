@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> AQI App </title>
+		<style>
+			*, html {
+				margin:0;
+				padding:0;
+			}
+			
+			form {
+				text-align : center;
+				color : #00f;
+				font-size : 22px;
+				font-family : cursive;
+				border : 0.5px solid grey;
+			}
+			
+			div {
+				width : 60%;
+				margin-left : auto;
+				margin-right : auto;
+				margin-top : 10px;
+				font-size: 18px;
+				font-family : "Proxima Nova", Futura, cursive;
+				padding: 3px;
+				padding-left : 10px;
+			}
+
+			h2 {
+				text-align: center;
+				color: #0086c8;
+			}
+			
+			p {
+				color: black;
+			}
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+	</head>
+	
+	<body>
+		<div class="form">
+			<form action="http://127.0.0.1:5000/aqi" method="POST">
+				<p> Enter city <input type="input" name="city"> </p>
+				<input type="submit" value="submit">
+			</form>
+		</div>
+		
+		{% if result %}
+			<div class="info">
+				<h2> AQI Info for {{result['city']}} </h2>
+				<span> AQI : {{ result['aqi'] }} </span>
+				<br/>
+				{% for key, value in result['stats'].items() %}
+					<span> {{key}} : {{value['v']}} </span> <br/>
+				{% endfor %}
+			</div>
+			
+			<div class="chartdiv">
+				<canvas id="chart"></canvas>
+			</div>
+		{% endif %}
+		
+		<script>
+			{% if result %}
+				var data = [];
+				var labels = [];
+				var colors = [];
+				{% for key, value in result['stats'].items() %}
+					labels.push('{{key}}');
+					data.push({{value['v']}});
+					colors.push(`rgb(${getPixel()}, ${getPixel()}, ${getPixel()})`);
+				{% endfor %}
+
+				new Chart("chart", {
+					type: 'pie',
+					data: {
+					labels : labels,
+					datasets : [{
+						label: 'Pollution level',
+						data: data,
+						backgroundColor : colors,
+						hoverOffset: 4
+						}]
+					}
+				});
+			{% endif %}
+
+			function getPixel() {
+				return Math.floor(Math.random() * 255)
+			}
+		</script>
+	</body>
+</html>
